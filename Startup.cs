@@ -2,12 +2,14 @@ using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NG_Core_Auth.Models.DAL;
+using NG_Core_Auth.Models.Entities;
 
 namespace NG_Core_Auth {
     public class Startup {
@@ -26,7 +28,19 @@ namespace NG_Core_Auth {
                 options.UseSqlServer (Configuration.GetConnectionString ("DefaultConnection"), b => b.MigrationsAssembly ("NG_Core_Auth"));
             });
 
+            services.AddIdentity<AppUser,AppRole>().AddEntityFrameworkStores<SecurityDbContext>().AddDefaultTokenProviders();
+            
+            services.Configure<IdentityOptions>(options=>{
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = true;
+                options.Password.RequiredLength = 6;
+                options.Password.RequiredUniqueChars = 1;
+            });
+
             services.AddAutoMapper();
+
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles (configuration => {
                 configuration.RootPath = "ClientApp/dist";
@@ -47,12 +61,14 @@ namespace NG_Core_Auth {
             app.UseStaticFiles ();
             app.UseSpaStaticFiles ();
 
+            app.UseAuthentication();
+
             app.UseMvc (routes => {
                 routes.MapRoute (
                     name: "default",
                     template: "{controller}/{action=Index}/{id?}");
             });
-
+            
             app.UseSpa (spa => {
                 // To learn more about options for serving an Angular SPA from ASP.NET Core,
                 // see https://go.microsoft.com/fwlink/?linkid=864501

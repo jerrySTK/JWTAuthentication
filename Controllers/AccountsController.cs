@@ -8,6 +8,7 @@ using NG_Core_Auth.Models.Entities;
 using NG_Core_Auth.ViewModels;
 
 namespace NG_Core_Auth.Controllers {
+    
     [Route ("api/[controller]")]
     public class AccountsController : Controller {
         private readonly UserManager<AppUser> _userManager;
